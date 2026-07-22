@@ -11,6 +11,14 @@ the kind of queries a credit risk analyst runs day to day.
 - **Data generation:** Python (pandas, numpy)
 - **Schema:** `borrowers`, `loans`, `payments`, `delinquency_history`
 
+**A note on Python vs SQL:** Python is used only for data generation
+and pipeline setup (`generate_data.py`, `load_to_duckdb.py`) — it
+never performs any analysis. Every actual query, aggregation, join,
+window function, and ranking lives in the `.sql` files under
+`queries/`. Think of Python here the same way you'd think of a CSV
+import step before you start querying a real database.
+
+
 ## Why synthetic data, and how it was built
 
 Real consumer credit datasets (e.g. Lending Club) exist but don't
@@ -61,8 +69,24 @@ con.execute(open("queries/01_origination_volume.sql").read()).df()
 Sample outputs for each query are in `sample_outputs/`.
 
 
-## Visual: Vintage Curves
+## Visuals
 
+### Monthly Origination Volume & Average FICO
+![Origination volume chart](sample_outputs/origination_volume_chart.png)
+
+Steady lending volume (~$1-1.9M/month) and stable average FICO
+(670-693) throughout the period -- confirming the H2 2022 default
+spike (see below) wasn't driven by a volume surge or a broad drop in
+borrower credit quality during that window.
+
+### Default Rate by Risk Decile
+![Risk decile chart](sample_outputs/risk_decile_chart.png)
+
+Default rate falls from 16.27% in the riskiest decile (lowest FICO)
+to 2.76-4.81% across the top deciles -- confirming FICO is a
+meaningfully predictive signal in this portfolio.
+
+### Vintage Curves: Cumulative Default by Months on Book
 ![Vintage curves chart](sample_outputs/vintage_curves_chart.png)
 
 Each line traces one origination vintage's cumulative default rate as
