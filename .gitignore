@@ -1,0 +1,9 @@
+# Regeneratable raw data files -- run generate_data.py + load_to_duckdb.py to recreate
+borrowers.csv
+loans.csv
+payments.csv
+delinquency_history.csv
+risk.duckdb
+.DS_Store
+__pycache__/
+*.pyc
