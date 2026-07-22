@@ -60,6 +60,18 @@ con.execute(open("queries/01_origination_volume.sql").read()).df()
 
 Sample outputs for each query are in `sample_outputs/`.
 
+
+## Visual: Vintage Curves
+
+![Vintage curves chart](sample_outputs/vintage_curves_chart.png)
+
+Each line traces one origination vintage's cumulative default rate as
+it ages (months on book). Red lines are the vintages hit by the
+simulated macro shock (loans originated 2022-06 through 2022-12) --
+they sit clearly above the blue baseline vintages at every age,
+confirming the effect is real and not just a byproduct of some
+vintages being observed longer than others.
+
 ## Data validation performed
 
 Before trusting any query result, two checks were run:
@@ -93,3 +105,44 @@ Before trusting any query result, two checks were run:
   `is None` / `is not None`.
 
 ## Schema
+
+**borrowers**
+| column | type | notes |
+|---|---|---|
+| borrower_id | INTEGER (PK) | |
+| fico_score | INTEGER | 300-850, snapshot at origination |
+| annual_income | DECIMAL | |
+| state | VARCHAR | 2-letter US state code |
+| dti_ratio | DECIMAL | debt-to-income %, at origination |
+
+**loans**
+| column | type | notes |
+|---|---|---|
+| loan_id | INTEGER (PK) | |
+| borrower_id | INTEGER (FK) | references borrowers |
+| origination_date | DATE | drives vintage month |
+| loan_amount | DECIMAL | |
+| term_months | INTEGER | 36 or 60 |
+| interest_rate | DECIMAL | |
+| loan_status | VARCHAR | Current / Fully Paid / Charged Off |
+
+**payments**
+| column | type | notes |
+|---|---|---|
+| payment_id | INTEGER (PK) | |
+| loan_id | INTEGER (FK) | references loans |
+| payment_date | DATE | monthly cadence |
+| scheduled_amount | DECIMAL | |
+| amount_paid | DECIMAL | |
+| days_past_due | INTEGER | 0, 30, 60, or 120 |
+
+**delinquency_history**
+| column | type | notes |
+|---|---|---|
+| snapshot_id | INTEGER (PK) | |
+| loan_id | INTEGER (FK) | references loans |
+| snapshot_date | DATE | monthly snapshot |
+| months_on_book | INTEGER | |
+| delinquency_bucket | VARCHAR | Current / 30DPD / 60DPD / 90+DPD / Charged Off |
+
+See `RISK_MEMO.md` for a narrative write-up of findings.
